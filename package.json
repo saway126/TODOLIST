@@ -1,0 +1,20 @@
+{
+  "name": "tauri-todo-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.5.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.11",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  }
+}

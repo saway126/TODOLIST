@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri Todo App</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/main.ts" defer></script>
+<script type="importmap">
+{
+  "imports": {
+    "vite": "https://aistudiocdn.com/vite@^7.1.12",
+    "@tauri-apps/api/": "https://aistudiocdn.com/@tauri-apps/api@^2.9.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div class="app-container">
+      <main class="main-content">
+        <header class="app-header">
+          <h1>TodoApp</h1>
+          <p>A simple, fast, and elegant way to manage your tasks.</p>
+          <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="theme-toggle" aria-label="Toggle dark mode">
+              <input type="checkbox" id="theme-toggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </header>
+
+        <div class="controls-card">
+          <form id="add-todo-form">
+            <div class="input-wrapper">
+              <input
+                id="add-todo-input"
+                type="text"
+                placeholder="What needs to be done?"
+                aria-label="New todo input"
+              />
+              <button type="submit" aria-label="Add todo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+            </div>
+          </form>
+          <div id="filter-controls" class="filter-controls">
+            <div class="filter-buttons">
+              <button data-filter="All" class="active">All</button>
+              <button data-filter="Today">Today</button>
+            </div>
+            <div class="search-wrapper">
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Search..."
+                aria-label="Search todos"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="todos-card">
+          <ul id="todo-list">
+            <!-- Todo items will be rendered here -->
+          </ul>
+        </div>
+
+        <footer class="app-footer">
+            <p>Shortcuts: &uarr;&darr; to navigate, [space] to toggle, [e] to edit, [del] to delete.</p>
+            <p>Press [Enter] in the input field to add a new todo.</p>
+        </footer>
+      </main>
+    </div>
+    <div id="toast-container"></div>
+  </body>
+</html>

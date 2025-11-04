@@ -1,0 +1,5 @@
+{
+  "name": "React Todo App",
+  "description": "A modern, responsive TODO application built with React and Tailwind CSS, featuring local persistence, keyboard shortcuts, and filtering.",
+  "requestFramePermissions": []
+}
