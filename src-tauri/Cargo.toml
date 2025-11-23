@@ -1,0 +1,19 @@
+[package]
+name = "tauri-todo-app"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = [ "window-start-dragging", "window-close", "fs-write-file", "window-hide", "fs-create-dir", "window-unmaximize", "window-maximize", "window-show", "window-minimize", "fs-read-file", "window-unminimize", "shell-open", "path-all"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
