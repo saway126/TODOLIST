@@ -709,5 +709,209 @@ input:checked + .slider:before {
 }
 
 .primary-btn:hover {
-  filter: brightness(110%);
+  filter: brightness(110%);}
+
+.secondary-btn {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondary-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+/* Source Badge Styles */
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background-color: var(--input-bg);
+  color: var(--secondary-text);
+  border: 1px solid var(--border-color);
+}
+
+.source-badge.source-image {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+[data-theme="dark"] .source-badge.source-image {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+  border-color: #1e40af;
+}
+
+.source-badge.source-pdf {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+[data-theme="dark"] .source-badge.source-pdf {
+  background-color: #78350f;
+  color: #fcd34d;
+  border-color: #92400e;
+}
+
+/* Detail View Button */
+.detail-view-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--primary-color);
+  transition: transform 0.2s;
+}
+
+.detail-view-btn:hover {
+  transform: scale(1.1);
+  color: var(--primary-color);
+}
+
+.detail-view-btn .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* File Drop Zone */
+.file-drop-zone {
+  margin-top: 1rem;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  text-align: center;
+  background-color: var(--input-bg);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.drag-over {
+  border-color: var(--primary-color);
+  background-color: var(--hover-bg);
+}
+
+.file-drop-zone p {
+  margin-bottom: 1rem;
+  color: var(--secondary-text);
+}
+
+.small-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Detail Modal Specific Styles */
+.detail-section {
+  margin-bottom: 1.5rem;
+}
+
+.detail-section h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.detail-section p {
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--secondary-text);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+}
+
+.badge.source-image {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+[data-theme="dark"] .badge.source-image {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+  border-color: #1e40af;
+}
+
+.badge.source-pdf {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+[data-theme="dark"] .badge.source-pdf {
+  background-color: #78350f;
+  color: #fcd34d;
+  border-color: #92400e;
+}
+
+.badge.source-text {
+  background-color: var(--input-bg);
+  color: var(--secondary-text);
+  border-color: var(--border-color);
+}
+
+/* Language Toggle */
+#lang-toggle-btn {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Settings Modal */
+.setting-item {
+  margin-bottom: 1.5rem;
+}
+
+.setting-item label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.setting-item input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-family: monospace;
+}
+
+.setting-hint {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--secondary-text);
 }

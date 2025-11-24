@@ -1,9 +1,10 @@
 import { todoStore } from "../services/todoStore";
 import { FilterType } from "../types";
-import { showToast, clearAddTodoInput, getElements, toggleImportModal, render } from "./dom";
+import { showToast, clearAddTodoInput, getElements, toggleImportModal, render, updateTranslations } from "./dom";
 import { THEME_STORAGE_KEY } from "../main";
 import { AIParser } from "../services/aiParser";
 import { t, getLanguage, setLanguage, tDynamic } from "../services/i18n";
+import { analyzeImage, analyzePdf, getApiKey, setApiKey } from "../services/aiService";
 
 const addTodoForm = document.getElementById("add-todo-form") as HTMLFormElement;
 const addTodoInput = document.getElementById("add-todo-input") as HTMLInputElement;
@@ -159,7 +160,153 @@ export const initEventListeners = () => {
     window.addEventListener("keydown", handleGlobalKeyDown);
 
     // Import Feature Events
-    const { openImportBtn, closeModalBtn, processImportBtn, importTextarea, importModal, langToggleBtn, pasteImportBtn } = getElements();
+    const {
+        openImportBtn, closeModalBtn, processImportBtn, importTextarea, importModal,
+        langToggleBtn, pasteImportBtn,
+        openSettingsBtn, closeSettingsBtn, saveSettingsBtn, settingsModal, apiKeyInput,
+        fileDropZone, fileInput, browseBtn,
+        detailModal, closeDetailBtn, detailTitle, detailDescription, detailSourceBadge, detailDate
+    } = getElements();
+
+    // Settings Modal
+    if (openSettingsBtn) {
+        openSettingsBtn.addEventListener("click", () => {
+            const currentKey = getApiKey();
+            if (currentKey) apiKeyInput.value = currentKey;
+            settingsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener("click", () => settingsModal.classList.add('hidden'));
+    }
+
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener("click", () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                setApiKey(key);
+                showToast("API Key saved!");
+                settingsModal.classList.add('hidden');
+            } else {
+                showToast("Please enter an API Key.");
+            }
+        });
+    }
+
+    // File Upload Handling
+    if (browseBtn && fileInput) {
+        browseBtn.addEventListener("click", () => fileInput.click());
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener("change", async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) await handleFileUpload(file);
+        });
+    }
+
+    if (fileDropZone) {
+        fileDropZone.addEventListener("dragover", (e: DragEvent) => {
+            e.preventDefault();
+            fileDropZone.classList.add('drag-over');
+        });
+        fileDropZone.addEventListener("dragleave", () => fileDropZone.classList.remove('drag-over'));
+        fileDropZone.addEventListener("drop", async (e: DragEvent) => {
+            e.preventDefault();
+            fileDropZone.classList.remove('drag-over');
+            const file = e.dataTransfer?.files[0];
+            if (file) await handleFileUpload(file);
+        });
+    }
+
+    const handleFileUpload = async (file: File) => {
+        if (!getApiKey()) {
+            showToast("Please set API Key in Settings first.");
+            return;
+        }
+
+        showToast("Analyzing file... please wait.");
+
+        try {
+            let result;
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = async (e: ProgressEvent<FileReader>) => {
+                    const base64 = e.target?.result as string;
+                    if (!base64) return;
+                    // Remove data URL prefix
+                    const base64Data = base64.split(',')[1];
+                    try {
+                        result = await analyzeImage(base64Data);
+                        processAnalysisResult(result, 'image');
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Failed to analyze image.");
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                // For PDF, we might need to extract text or send as file
+                // For this mock, we'll just send a dummy text
+                result = await analyzePdf("dummy pdf content");
+                processAnalysisResult(result, 'pdf');
+            } else {
+                showToast("Unsupported file type.");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Error processing file.");
+        }
+    };
+
+    const processAnalysisResult = (result: any, sourceType: 'image' | 'pdf') => {
+        if (result && result.tasks && result.tasks.length > 0) {
+            todoStore.addTodos(result.tasks, sourceType);
+            showToast(tDynamic('toastImported', result.tasks.length));
+            toggleImportModal(false);
+        } else {
+            showToast(t('toastNoTasks'));
+        }
+    };
+
+    // Detail Modal
+    if (todoList) {
+        todoList.addEventListener("click", (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            // Check if clicked on detail button or its SVG child
+            const detailBtn = target.closest('.detail-view-btn');
+            if (detailBtn) {
+                const li = detailBtn.closest('li');
+                const id = li?.dataset.id;
+                if (id) {
+                    const todo = todoStore.getTodoById(id);
+
+                    if (todo && detailModal) {
+                        detailTitle.textContent = todo.text;
+                        detailDescription.textContent = todo.description || t('detailDescription');
+
+                        // Show source badge
+                        const sourceText = todo.sourceType ?
+                            (todo.sourceType === 'image' ? '🖼️ Image' :
+                                todo.sourceType === 'pdf' ? '📄 PDF' : 'Text') : 'Text';
+                        detailSourceBadge.textContent = sourceText;
+                        detailSourceBadge.className = `badge source-${todo.sourceType || 'text'}`;
+
+                        detailDate.textContent = new Date(todo.createdAt).toLocaleString();
+
+                        detailModal.classList.remove('hidden');
+                    }
+                }
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (closeDetailBtn) {
+        closeDetailBtn.addEventListener("click", () => detailModal.classList.add('hidden'));
+    }
 
     if (pasteImportBtn) {
         pasteImportBtn.addEventListener("click", async () => {
@@ -167,8 +314,6 @@ export const initEventListeners = () => {
                 const text = await navigator.clipboard.readText();
                 if (text) {
                     importTextarea.value = text;
-                    // Optional: Auto-process?
-                    // For now, just paste it so user can review
                     importTextarea.focus();
                     showToast("Pasted from clipboard!");
                 } else {
@@ -182,7 +327,10 @@ export const initEventListeners = () => {
     }
 
     if (openImportBtn) {
-        openImportBtn.addEventListener("click", () => toggleImportModal(true));
+        openImportBtn.addEventListener("click", () => {
+            toggleImportModal(true);
+            updateTranslations();
+        });
     }
 
     if (closeModalBtn) {
@@ -206,7 +354,8 @@ export const initEventListeners = () => {
 
             const tasks = AIParser.parseTasks(text);
             if (tasks.length > 0) {
-                todoStore.addTodos(tasks);
+                // Map strings to objects for the new signature
+                todoStore.addTodos(tasks.map(t => ({ text: t })), 'text');
                 showToast(tDynamic('toastImported', tasks.length));
                 toggleImportModal(false);
             } else {

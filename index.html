@@ -38,6 +38,14 @@
               <span class="slider"></span>
             </label>
           </div>
+          <button id="open-settings-btn" class="icon-btn" aria-label="Settings" title="Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -95,11 +103,58 @@
       <div class="modal-body">
         <p data-i18n="importBody">Paste your conversation with the AI below. We'll extract the tasks for you.</p>
         <textarea id="import-textarea" placeholder="Paste conversation here..."></textarea>
+
+        <div class="file-drop-zone" id="file-drop-zone">
+          <p data-i18n="dropZoneHint">Or drag & drop image/PDF here</p>
+          <input type="file" id="file-input" accept="image/*,.pdf" style="display: none;" />
+          <button id="browse-btn" class="secondary-btn small-btn" data-i18n="browseBtn">Browse Files</button>
+        </div>
+        <div id="file-preview" class="hidden"></div>
       </div>
       <div class="modal-footer">
         <button id="paste-import-btn" class="secondary-btn" style="margin-right: 10px;" data-i18n="pasteBtn">Paste from
           Clipboard</button>
         <button id="process-import-btn" class="primary-btn" data-i18n="importBtn">Import Tasks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-i18n="settingsTitle">Settings</h2>
+        <button id="close-settings-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <label for="api-key-input" data-i18n="apiKeyLabel">OpenAI API Key</label>
+          <input type="password" id="api-key-input" placeholder="sk-..." />
+          <p class="setting-hint" data-i18n="apiKeyHint">Required for image and PDF analysis.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-settings-btn" class="primary-btn" data-i18n="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="detail-title">Task Detail</h2>
+        <button id="close-detail-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <h3 data-i18n="detailDescription">Description</h3>
+          <p id="detail-description">No description available.</p>
+        </div>
+        <div class="detail-meta">
+          <span id="detail-source-badge" class="badge">Source: Text</span>
+          <span id="detail-date"></span>
+        </div>
       </div>
     </div>
   </div>

@@ -17,6 +17,24 @@ const elements = {
   importTextarea: document.getElementById("import-textarea") as HTMLTextAreaElement,
   langToggleBtn: document.getElementById("lang-toggle-btn")!,
   langText: document.querySelector(".lang-text") as HTMLSpanElement,
+  // Settings Elements
+  openSettingsBtn: document.getElementById("open-settings-btn")!,
+  settingsModal: document.getElementById("settings-modal")!,
+  closeSettingsBtn: document.getElementById("close-settings-btn")!,
+  saveSettingsBtn: document.getElementById("save-settings-btn")!,
+  apiKeyInput: document.getElementById("api-key-input") as HTMLInputElement,
+  // File Import Elements
+  fileDropZone: document.getElementById("file-drop-zone")!,
+  fileInput: document.getElementById("file-input") as HTMLInputElement,
+  browseBtn: document.getElementById("browse-btn")!,
+  filePreview: document.getElementById("file-preview")!,
+  // Detail Modal Elements
+  detailModal: document.getElementById("detail-modal")!,
+  closeDetailBtn: document.getElementById("close-detail-btn")!,
+  detailTitle: document.getElementById("detail-title")!,
+  detailDescription: document.getElementById("detail-description")!,
+  detailSourceBadge: document.getElementById("detail-source-badge")!,
+  detailDate: document.getElementById("detail-date")!,
 };
 
 export const getElements = () => elements;
@@ -66,14 +84,33 @@ const createTodoItemHTML = (todo: Todo, isFocused: boolean): string => {
   const completedClass = todo.completed ? "completed" : "";
   const focusedClass = isFocused ? "focused" : "";
 
+  // Source badge
+  let sourceBadge = '';
+  if (todo.sourceType && todo.sourceType !== 'text') {
+    const sourceIcon = todo.sourceType === 'image' ? '🖼️' : '📄';
+    const sourceLabel = todo.sourceType === 'image' ? 'Image' : 'PDF';
+    sourceBadge = `<span class="source-badge source-${todo.sourceType}" title="Imported from ${sourceLabel}">${sourceIcon} ${sourceLabel}</span>`;
+  }
+
+  // Detail button (only if description exists)
+  const detailButton = todo.description ? `
+    <button class="detail-view-btn" aria-label="View details" title="${t('viewDetails')}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </button>
+  ` : '';
+
   return `
     <li data-id="${todo.id}" class="${focusedClass}">
       <input type="checkbox" class="todo-checkbox" ${todo.completed ? "checked" : ""}>
       <div class="todo-text-container">
         <span class="todo-text ${completedClass}">${todo.text}</span>
+        ${sourceBadge}
         <input type="text" class="edit-input" value="${todo.text}" style="display: none;">
       </div>
       <div class="todo-actions">
+        ${detailButton}
         <button class="edit-btn" aria-label="Edit todo">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" />
@@ -135,16 +172,7 @@ export const render = () => {
  * @param message The message to display (can be a translation key or raw string).
  */
 export const showToast = (message: string) => {
-  // Check if message is a key in translations
-  // This is a simple check; for more robust apps, use a specific type or prefix
   let displayMessage = message;
-  try {
-    // Try to translate if it looks like a key (simple heuristic or just try)
-    // In this app, we'll assume if it matches a key in 'en', it's a key.
-    // But since we pass dynamic strings too, we might need to be careful.
-    // For now, let's just display what is passed, assuming the caller translates it.
-    displayMessage = message;
-  } catch (e) { }
 
   const toast = document.createElement('div');
   toast.className = 'toast';

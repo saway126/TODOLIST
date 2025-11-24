@@ -40,6 +40,10 @@ class TodoStore {
     return this.focusedTodoId;
   }
 
+  getTodoById(id: string): Todo | undefined {
+    return this.todos.find(t => t.id === id);
+  }
+
   // STATE MUTATORS
   async init() {
     this.todos = await readTodos();
@@ -47,27 +51,31 @@ class TodoStore {
     this.updateFocus(); // Set initial focus
   }
 
-  addTodo(text: string) {
+  addTodo(text: string, description?: string, sourceType: 'text' | 'image' | 'pdf' = 'text') {
     if (!text.trim()) return;
     const newTodo: Todo = {
       id: crypto.randomUUID(),
       text: text.trim(),
       completed: false,
       createdAt: new Date().toISOString(),
+      description,
+      sourceType
     };
     this.todos.unshift(newTodo);
     this.save();
     this.notify();
   }
 
-  addTodos(texts: string[]) {
-    if (texts.length === 0) return;
+  addTodos(items: { text: string, description?: string }[], sourceType: 'text' | 'image' | 'pdf' = 'text') {
+    if (items.length === 0) return;
 
-    const newTodos: Todo[] = texts.map(text => ({
+    const newTodos: Todo[] = items.map(item => ({
       id: crypto.randomUUID(),
-      text: text.trim(),
+      text: item.text.trim(),
       completed: false,
       createdAt: new Date().toISOString(),
+      description: item.description,
+      sourceType
     }));
 
     this.todos.unshift(...newTodos);

@@ -24,7 +24,16 @@ export const translations = {
         emptyState: 'No todos found. Try a different filter or create a new one!',
         themeToggleLabel: 'Toggle dark mode',
         langToggleLabel: 'Switch to Korean',
-        importLabel: 'Import from AI'
+        importLabel: 'Import from AI',
+        settingsTitle: 'Settings',
+        apiKeyLabel: 'OpenAI API Key',
+        apiKeyHint: 'Required for image and PDF analysis.',
+        saveBtn: 'Save',
+        dropZoneHint: 'Or drag & drop image/PDF here',
+        browseBtn: 'Browse Files',
+        detailDescription: 'Description',
+        detailSource: 'Source',
+        viewDetails: 'View Details'
     },
     ko: {
         appTitle: '투두앱',
@@ -49,7 +58,16 @@ export const translations = {
         emptyState: '할 일이 없습니다. 필터를 변경하거나 새로 만들어보세요!',
         themeToggleLabel: '다크 모드 전환',
         langToggleLabel: '영어로 전환',
-        importLabel: 'AI에서 가져오기'
+        importLabel: 'AI에서 가져오기',
+        settingsTitle: '설정',
+        apiKeyLabel: 'OpenAI API 키',
+        apiKeyHint: '이미지 및 PDF 분석을 위해 필요합니다.',
+        saveBtn: '저장',
+        dropZoneHint: '또는 이미지/PDF를 여기로 드래그하세요',
+        browseBtn: '파일 찾기',
+        detailDescription: '상세 설명',
+        detailSource: '출처',
+        viewDetails: '자세히 보기'
     }
 };
 
@@ -68,6 +86,11 @@ export const setLanguage = (lang: Language) => {
 export const t = (key: keyof typeof translations['en']): string => {
     const lang = getLanguage();
     let value = translations[lang][key];
+
+    // Debugging: Log if key is missing
+    if (!value) {
+        console.warn(`Missing translation for key: ${key} in language: ${lang}`);
+    }
 
     // Fallback to English if missing in current language
     if (!value && lang !== 'en') {

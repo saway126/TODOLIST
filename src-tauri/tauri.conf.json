@@ -18,8 +18,11 @@
         "readFile": true,
         "writeFile": true,
         "createDir": true,
+        "exists": true,
         "scope": [
-          "$APPDATA/todos.json"
+          "$APPDATA",
+          "$APPDATA/*",
+          "$APPDATA/**/*"
         ]
       },
       "path": {
