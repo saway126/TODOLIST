@@ -229,17 +229,17 @@ export const initEventListeners = () => {
         showToast("Analyzing file... please wait.");
 
         try {
-            let result;
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = async (e: ProgressEvent<FileReader>) => {
-                    const base64 = e.target?.result as string;
-                    if (!base64) return;
-                    // Remove data URL prefix
-                    const base64Data = base64.split(',')[1];
+                    const base64Full = e.target?.result as string;
+                    if (!base64Full) return;
+                    // Keep full data URL for preview
+                    const base64Data = base64Full.split(',')[1];
                     try {
-                        result = await analyzeImage(base64Data);
-                        processAnalysisResult(result, 'image');
+                        const result = await analyzeImage(base64Data);
+                        // Pass the full base64 data URL for preview
+                        processAnalysisResult(result, 'image', base64Full);
                     } catch (err) {
                         console.error(err);
                         showToast("Failed to analyze image.");
@@ -249,8 +249,8 @@ export const initEventListeners = () => {
             } else if (file.type === 'application/pdf') {
                 // For PDF, we might need to extract text or send as file
                 // For this mock, we'll just send a dummy text
-                result = await analyzePdf("dummy pdf content");
-                processAnalysisResult(result, 'pdf');
+                const result = await analyzePdf("dummy pdf content");
+                processAnalysisResult(result, 'pdf', file.name);
             } else {
                 showToast("Unsupported file type.");
             }
@@ -260,9 +260,14 @@ export const initEventListeners = () => {
         }
     };
 
-    const processAnalysisResult = (result: any, sourceType: 'image' | 'pdf') => {
+    const processAnalysisResult = (result: any, sourceType: 'image' | 'pdf', sourceData?: string) => {
         if (result && result.tasks && result.tasks.length > 0) {
-            todoStore.addTodos(result.tasks, sourceType);
+            // Add sourceData to each task
+            const tasksWithSource = result.tasks.map((task: any) => ({
+                ...task,
+                sourceData: sourceData
+            }));
+            todoStore.addTodos(tasksWithSource, sourceType);
             showToast(tDynamic('toastImported', result.tasks.length));
             toggleImportModal(false);
         } else {
@@ -270,11 +275,10 @@ export const initEventListeners = () => {
         }
     };
 
-    // Detail Modal
+    // Detail Modal - Enhanced
     if (todoList) {
         todoList.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
-            // Check if clicked on detail button or its SVG child
             const detailBtn = target.closest('.detail-view-btn');
             if (detailBtn) {
                 const li = detailBtn.closest('li');
@@ -283,17 +287,51 @@ export const initEventListeners = () => {
                     const todo = todoStore.getTodoById(id);
 
                     if (todo && detailModal) {
+                        // Set title
                         detailTitle.textContent = todo.text;
-                        detailDescription.textContent = todo.description || t('detailDescription');
 
-                        // Show source badge
+                        // Set description
+                        const descEl = document.getElementById('detail-description');
+                        if (descEl) {
+                            descEl.textContent = todo.description || 'No description available.';
+                        }
+
+                        // Set source badge
                         const sourceText = todo.sourceType ?
                             (todo.sourceType === 'image' ? '🖼️ Image' :
-                                todo.sourceType === 'pdf' ? '📄 PDF' : 'Text') : 'Text';
+                                todo.sourceType === 'pdf' ? '📄 PDF' : '📝 Text') : '📝 Text';
                         detailSourceBadge.textContent = sourceText;
                         detailSourceBadge.className = `badge source-${todo.sourceType || 'text'}`;
 
+                        // Set date
                         detailDate.textContent = new Date(todo.createdAt).toLocaleString();
+
+                        // Handle preview section
+                        const previewSection = document.getElementById('detail-preview-section');
+                        const previewContainer = document.getElementById('detail-preview-container');
+
+                        if (todo.sourceData && previewSection && previewContainer) {
+                            if (todo.sourceType === 'image') {
+                                // Show image preview
+                                previewContainer.innerHTML = `
+                                    <img src="${todo.sourceData}" alt="Source image" class="preview-image" />
+                                `;
+                                previewSection.classList.remove('hidden');
+                            } else if (todo.sourceType === 'pdf') {
+                                // Show PDF info
+                                previewContainer.innerHTML = `
+                                    <div class="pdf-preview">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="pdf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="pdf-name">${todo.sourceData}</p>
+                                    </div>
+                                `;
+                                previewSection.classList.remove('hidden');
+                            }
+                        } else if (previewSection) {
+                            previewSection.classList.add('hidden');
+                        }
 
                         detailModal.classList.remove('hidden');
                     }
@@ -304,8 +342,39 @@ export const initEventListeners = () => {
         });
     }
 
-    if (closeDetailBtn) {
-        closeDetailBtn.addEventListener("click", () => detailModal.classList.add('hidden'));
+    // Copy description button
+    const copyDescBtn = document.getElementById('copy-description-btn');
+    if (copyDescBtn) {
+        copyDescBtn.addEventListener('click', async () => {
+            const descEl = document.getElementById('detail-description');
+            if (descEl) {
+                try {
+                    await navigator.clipboard.writeText(descEl.textContent || '');
+                    showToast('Description copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    showToast('Failed to copy description');
+                }
+            }
+        });
+    }
+
+    // Detail close button
+    const detailCloseBtn = document.getElementById('detail-close-btn');
+    if (detailCloseBtn) {
+        detailCloseBtn.addEventListener("click", () => detailModal.classList.add('hidden'));
+    }
+
+    // Preview fullscreen button
+    const previewFullscreenBtn = document.getElementById('preview-fullscreen-btn');
+    if (previewFullscreenBtn) {
+        previewFullscreenBtn.addEventListener('click', () => {
+            const previewImg = document.querySelector('.preview-image') as HTMLImageElement;
+            if (previewImg && previewImg.src) {
+                // Open in new window
+                window.open(previewImg.src, '_blank');
+            }
+        });
     }
 
     if (pasteImportBtn) {

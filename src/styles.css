@@ -51,7 +51,8 @@ body {
 
 .main-content {
   width: 100%;
-  max-width: 48rem; /* 768px */
+  max-width: 48rem;
+  /* 768px */
 }
 
 .app-header {
@@ -72,7 +73,8 @@ body {
   margin-top: 0.5rem;
 }
 
-.controls-card, .todos-card {
+.controls-card,
+.todos-card {
   background-color: var(--card-bg);
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -113,6 +115,7 @@ input[type="text"]:focus {
   border: none;
   cursor: pointer;
 }
+
 .input-wrapper button:hover {
   color: var(--primary-color);
 }
@@ -124,6 +127,7 @@ input[type="text"]:focus {
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
+
 @media (min-width: 640px) {
   .filter-controls {
     flex-direction: row;
@@ -162,10 +166,12 @@ input[type="text"]:focus {
   position: relative;
   width: 100%;
 }
+
 @media (min-width: 640px) {
   .search-wrapper {
     width: auto;
   }
+
   .search-wrapper input {
     width: 12rem;
   }
@@ -213,10 +219,12 @@ input[type="text"]:focus {
   margin-left: 1rem;
   flex-grow: 1;
 }
+
 #todo-list li .todo-text.completed {
   text-decoration: line-through;
   color: var(--secondary-text);
 }
+
 #todo-list li .edit-input {
   width: 100%;
   background: transparent;
@@ -235,6 +243,7 @@ input[type="text"]:focus {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
 #todo-list li:hover .todo-actions,
 #todo-list li.focused .todo-actions,
 #todo-list li .todo-actions:focus-within {
@@ -248,12 +257,15 @@ input[type="text"]:focus {
   padding: 0.25rem;
   color: var(--secondary-text);
 }
+
 #todo-list li .todo-actions button.edit-btn:hover {
   color: var(--primary-color);
 }
+
 #todo-list li .todo-actions button.delete-btn:hover {
   color: var(--danger-color);
 }
+
 #todo-list li .icon {
   width: 1.25rem;
   height: 1.25rem;
@@ -279,6 +291,7 @@ input[type="text"]:focus {
   right: 1.25rem;
   z-index: 1000;
 }
+
 .toast {
   background-color: #1f2937;
   color: #f9fafb;
@@ -289,9 +302,11 @@ input[type="text"]:focus {
   align-items: center;
   animation: fade-in-up 0.3s ease-out forwards;
 }
+
 .toast-message {
   margin-right: 1rem;
 }
+
 .toast-close {
   background: none;
   border: none;
@@ -300,19 +315,23 @@ input[type="text"]:focus {
   line-height: 1;
   cursor: pointer;
 }
+
 .toast-close:hover {
   color: #ffffff;
 }
+
 @keyframes fade-in-up {
   0% {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .icon {
   width: 1.5rem;
   height: 1.5rem;
@@ -362,7 +381,7 @@ input[type="text"]:focus {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--primary-color);
 }
 
@@ -408,10 +427,12 @@ input:checked + .slider {
   margin-left: 1rem;
   flex-grow: 1;
 }
+
 #todo-list li .todo-text.completed {
   text-decoration: line-through;
   color: var(--secondary-text);
 }
+
 #todo-list li .edit-input {
   width: 100%;
   background: transparent;
@@ -430,6 +451,7 @@ input:checked + .slider {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
 #todo-list li:hover .todo-actions,
 #todo-list li.focused .todo-actions,
 #todo-list li .todo-actions:focus-within {
@@ -443,12 +465,15 @@ input:checked + .slider {
   padding: 0.25rem;
   color: var(--secondary-text);
 }
+
 #todo-list li .todo-actions button.edit-btn:hover {
   color: var(--primary-color);
 }
+
 #todo-list li .todo-actions button.delete-btn:hover {
   color: var(--danger-color);
 }
+
 #todo-list li .icon {
   width: 1.25rem;
   height: 1.25rem;
@@ -474,6 +499,7 @@ input:checked + .slider {
   right: 1.25rem;
   z-index: 1000;
 }
+
 .toast {
   background-color: #1f2937;
   color: #f9fafb;
@@ -484,9 +510,11 @@ input:checked + .slider {
   align-items: center;
   animation: fade-in-up 0.3s ease-out forwards;
 }
+
 .toast-message {
   margin-right: 1rem;
 }
+
 .toast-close {
   background: none;
   border: none;
@@ -495,19 +523,23 @@ input:checked + .slider {
   line-height: 1;
   cursor: pointer;
 }
+
 .toast-close:hover {
   color: #ffffff;
 }
+
 @keyframes fade-in-up {
   0% {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .icon {
   width: 1.5rem;
   height: 1.5rem;
@@ -557,15 +589,15 @@ input:checked + .slider {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--primary-color);
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px var(--primary-color);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(26px);
 }
 
@@ -580,7 +612,8 @@ input:checked + .slider:before {
 }
 
 .theme-switch-wrapper {
-  position: static; /* Reset absolute positioning */
+  position: static;
+  /* Reset absolute positioning */
 }
 
 .icon-btn {
@@ -709,7 +742,8 @@ input:checked + .slider:before {
 }
 
 .primary-btn:hover {
-  filter: brightness(110%);}
+  filter: brightness(110%);
+}
 
 .secondary-btn {
   background-color: var(--input-bg);
@@ -914,4 +948,192 @@ input:checked + .slider:before {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--secondary-text);
+}
+
+/* Enhanced Detail Modal */
+.detail-modal-content {
+  max-width: 800px;
+}
+
+.detail-modal-body {
+  max-height: 70vh;
+}
+
+.detail-header-content {
+  flex: 1;
+}
+
+.detail-header-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.detail-date-text {
+  font-size: 0.875rem;
+  color: var(--secondary-text);
+}
+
+/* Preview Section */
+.detail-preview-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.preview-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.preview-container {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.pdf-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--secondary-text);
+}
+
+.pdf-name {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Section Headers with Copy Button */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.section-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--secondary-text);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.copy-btn:hover {
+  color: var(--primary-color);
+}
+
+.icon-small {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-btn-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--secondary-text);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn-small:hover {
+  color: var(--primary-color);
+}
+
+/* Description Content */
+.description-content {
+  color: var(--text-color);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: var(--input-bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+/* Code Block */
+.code-block {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .code-block {
+  background-color: #0d1117;
+  border: 1px solid var(--border-color);
+}
+
+.code-block code {
+  color: inherit;
+}
+
+/* Modal Footer with Buttons */
+.modal-footer {
+  gap: 0.75rem;
+}
+
+.modal-footer .secondary-btn,
+.modal-footer .primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Hidden utility */
+.hidden {
+  display: none !important;
 }

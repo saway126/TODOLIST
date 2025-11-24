@@ -141,20 +141,77 @@
 
   <!-- Detail Modal -->
   <div id="detail-modal" class="modal hidden">
-    <div class="modal-content">
+    <div class="modal-content detail-modal-content">
       <div class="modal-header">
-        <h2 id="detail-title">Task Detail</h2>
+        <div class="detail-header-content">
+          <h2 id="detail-title">Task Detail</h2>
+          <div class="detail-header-meta">
+            <span id="detail-source-badge" class="badge">Source: Text</span>
+            <span id="detail-date" class="detail-date-text"></span>
+          </div>
+        </div>
         <button id="close-detail-btn" class="close-btn">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body detail-modal-body">
+        <!-- Image/PDF Preview Section -->
+        <div id="detail-preview-section" class="detail-preview-section hidden">
+          <div class="preview-header">
+            <h3 data-i18n="previewTitle">Source Preview</h3>
+            <button id="preview-fullscreen-btn" class="icon-btn-small" title="View fullscreen">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            </button>
+          </div>
+          <div id="detail-preview-container" class="preview-container">
+            <!-- Preview content will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Description Section -->
         <div class="detail-section">
-          <h3 data-i18n="detailDescription">Description</h3>
-          <p id="detail-description">No description available.</p>
+          <div class="section-header">
+            <h3 data-i18n="detailDescription">Description</h3>
+            <button id="copy-description-btn" class="copy-btn" title="Copy description">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+          <div id="detail-description" class="description-content">
+            No description available.
+          </div>
         </div>
-        <div class="detail-meta">
-          <span id="detail-source-badge" class="badge">Source: Text</span>
-          <span id="detail-date"></span>
+
+        <!-- AI Analysis Section (if available) -->
+        <div id="detail-analysis-section" class="detail-section hidden">
+          <div class="section-header">
+            <h3>AI Analysis</h3>
+            <button id="copy-analysis-btn" class="copy-btn" title="Copy analysis">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+          <pre id="detail-analysis-content" class="code-block"><code></code></pre>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button id="detail-edit-btn" class="secondary-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z" />
+          </svg>
+          Edit Task
+        </button>
+        <button id="detail-close-btn" class="primary-btn">Close</button>
       </div>
     </div>
   </div>

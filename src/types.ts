@@ -5,6 +5,7 @@ export interface Todo {
   createdAt: string; // ISO string format
   description?: string; // AI generated summary or detailed description
   sourceType?: 'text' | 'image' | 'pdf'; // Origin of the task
+  sourceData?: string; // Base64 image data or file path for preview
 }
 
 export enum FilterType {

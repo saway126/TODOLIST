@@ -33,7 +33,8 @@ export const translations = {
         browseBtn: 'Browse Files',
         detailDescription: 'Description',
         detailSource: 'Source',
-        viewDetails: 'View Details'
+        viewDetails: 'View Details',
+        previewTitle: 'Source Preview'
     },
     ko: {
         appTitle: '투두앱',
@@ -67,7 +68,8 @@ export const translations = {
         browseBtn: '파일 찾기',
         detailDescription: '상세 설명',
         detailSource: '출처',
-        viewDetails: '자세히 보기'
+        viewDetails: '자세히 보기',
+        previewTitle: '원본 미리보기'
     }
 };
 

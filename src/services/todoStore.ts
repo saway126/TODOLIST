@@ -51,7 +51,7 @@ class TodoStore {
     this.updateFocus(); // Set initial focus
   }
 
-  addTodo(text: string, description?: string, sourceType: 'text' | 'image' | 'pdf' = 'text') {
+  addTodo(text: string, description?: string, sourceType: 'text' | 'image' | 'pdf' = 'text', sourceData?: string) {
     if (!text.trim()) return;
     const newTodo: Todo = {
       id: crypto.randomUUID(),
@@ -59,14 +59,15 @@ class TodoStore {
       completed: false,
       createdAt: new Date().toISOString(),
       description,
-      sourceType
+      sourceType,
+      sourceData
     };
     this.todos.unshift(newTodo);
     this.save();
     this.notify();
   }
 
-  addTodos(items: { text: string, description?: string }[], sourceType: 'text' | 'image' | 'pdf' = 'text') {
+  addTodos(items: { text: string, description?: string, sourceData?: string }[], sourceType: 'text' | 'image' | 'pdf' = 'text') {
     if (items.length === 0) return;
 
     const newTodos: Todo[] = items.map(item => ({
@@ -75,7 +76,8 @@ class TodoStore {
       completed: false,
       createdAt: new Date().toISOString(),
       description: item.description,
-      sourceType
+      sourceType,
+      sourceData: item.sourceData
     }));
 
     this.todos.unshift(...newTodos);
