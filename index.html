@@ -20,9 +20,12 @@
   <div class="app-container">
     <main class="main-content">
       <header class="app-header">
-        <h1>TodoApp</h1>
-        <p>A simple, fast, and elegant way to manage your tasks.</p>
+        <h1 data-i18n="appTitle">TodoApp</h1>
+        <p data-i18n="appSubtitle">A simple, fast, and elegant way to manage your tasks.</p>
         <div class="header-actions">
+          <button id="lang-toggle-btn" class="icon-btn" aria-label="Switch Language" title="Switch Language">
+            <span class="lang-text">KO</span>
+          </button>
           <button id="open-import-btn" class="icon-btn" aria-label="Import from AI" title="Import from AI">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -41,7 +44,8 @@
       <div class="controls-card">
         <form id="add-todo-form">
           <div class="input-wrapper">
-            <input id="add-todo-input" type="text" placeholder="What needs to be done?" aria-label="New todo input" />
+            <input id="add-todo-input" type="text" placeholder="What needs to be done?" aria-label="New todo input"
+              data-i18n-placeholder="inputPlaceholder" />
             <button type="submit" aria-label="Add todo">
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -52,11 +56,12 @@
         </form>
         <div id="filter-controls" class="filter-controls">
           <div class="filter-buttons">
-            <button data-filter="All" class="active">All</button>
-            <button data-filter="Today">Today</button>
+            <button data-filter="All" class="active" data-i18n="filterAll">All</button>
+            <button data-filter="Today" data-i18n="filterToday">Today</button>
           </div>
           <div class="search-wrapper">
-            <input id="search-input" type="text" placeholder="Search..." aria-label="Search todos" />
+            <input id="search-input" type="text" placeholder="Search..." aria-label="Search todos"
+              data-i18n-placeholder="searchPlaceholder" />
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -72,8 +77,9 @@
       </div>
 
       <footer class="app-footer">
-        <p>Shortcuts: &uarr;&darr; to navigate, [space] to toggle, [e] to edit, [del] to delete.</p>
-        <p>Press [Enter] in the input field to add a new todo.</p>
+        <p data-i18n="shortcuts">Shortcuts: &uarr;&darr; to navigate, [space] to toggle, [e] to edit, [del] to delete.
+        </p>
+        <p data-i18n="addTodoHint">Press [Enter] in the input field to add a new todo.</p>
       </footer>
     </main>
   </div>
@@ -83,15 +89,17 @@
   <div id="import-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Import from AI Conversation</h2>
+        <h2 data-i18n="importTitle">Import from AI Conversation</h2>
         <button id="close-modal-btn" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Paste your conversation with the AI below. We'll extract the tasks for you.</p>
+        <p data-i18n="importBody">Paste your conversation with the AI below. We'll extract the tasks for you.</p>
         <textarea id="import-textarea" placeholder="Paste conversation here..."></textarea>
       </div>
       <div class="modal-footer">
-        <button id="process-import-btn" class="primary-btn">Import Tasks</button>
+        <button id="paste-import-btn" class="secondary-btn" style="margin-right: 10px;" data-i18n="pasteBtn">Paste from
+          Clipboard</button>
+        <button id="process-import-btn" class="primary-btn" data-i18n="importBtn">Import Tasks</button>
       </div>
     </div>
   </div>

@@ -1,8 +1,9 @@
 import { todoStore } from "../services/todoStore";
 import { FilterType } from "../types";
-import { showToast, clearAddTodoInput, getElements, toggleImportModal } from "./dom";
+import { showToast, clearAddTodoInput, getElements, toggleImportModal, render } from "./dom";
 import { THEME_STORAGE_KEY } from "../main";
 import { AIParser } from "../services/aiParser";
+import { t, getLanguage, setLanguage, tDynamic } from "../services/i18n";
 
 const addTodoForm = document.getElementById("add-todo-form") as HTMLFormElement;
 const addTodoInput = document.getElementById("add-todo-input") as HTMLInputElement;
@@ -16,7 +17,7 @@ const handleAddTodo = (e: SubmitEvent) => {
     const text = addTodoInput.value;
     if (text.trim()) {
         todoStore.addTodo(text);
-        showToast("Todo added successfully!");
+        showToast(t('toastAdded'));
         clearAddTodoInput();
     }
 };
@@ -31,7 +32,7 @@ const handleTodoListClick = (e: MouseEvent) => {
         todoStore.toggleTodoCompletion(id);
     } else if (target.closest(".delete-btn")) {
         todoStore.deleteTodo(id);
-        showToast("Todo deleted.");
+        showToast(t('toastDeleted'));
     } else if (target.closest(".edit-btn")) {
         enterEditMode(li, id);
     }
@@ -79,7 +80,7 @@ const enterEditMode = (li: HTMLLIElement, id: string) => {
         const newText = editInput.value;
         if (newText.trim() && newText !== todoStore.getTodos().find(t => t.id === id)?.text) {
             todoStore.updateTodoText(id, newText);
-            showToast("Todo updated.");
+            showToast(t('toastUpdated'));
         }
         textSpan.style.display = "block";
         editInput.style.display = "none";
@@ -143,7 +144,7 @@ const handleGlobalKeyDown = (e: KeyboardEvent) => {
         case "Delete":
         case "Backspace":
             todoStore.deleteTodo(focusedId);
-            showToast("Todo deleted.");
+            showToast(t('toastDeleted'));
             break;
     }
 };
@@ -158,7 +159,27 @@ export const initEventListeners = () => {
     window.addEventListener("keydown", handleGlobalKeyDown);
 
     // Import Feature Events
-    const { openImportBtn, closeModalBtn, processImportBtn, importTextarea, importModal } = getElements();
+    const { openImportBtn, closeModalBtn, processImportBtn, importTextarea, importModal, langToggleBtn, pasteImportBtn } = getElements();
+
+    if (pasteImportBtn) {
+        pasteImportBtn.addEventListener("click", async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    importTextarea.value = text;
+                    // Optional: Auto-process?
+                    // For now, just paste it so user can review
+                    importTextarea.focus();
+                    showToast("Pasted from clipboard!");
+                } else {
+                    showToast("Clipboard is empty.");
+                }
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+                showToast("Failed to read clipboard.");
+            }
+        });
+    }
 
     if (openImportBtn) {
         openImportBtn.addEventListener("click", () => toggleImportModal(true));
@@ -179,18 +200,28 @@ export const initEventListeners = () => {
         processImportBtn.addEventListener("click", () => {
             const text = importTextarea.value;
             if (!text.trim()) {
-                showToast("Please paste some text first.");
+                showToast(t('toastPasteFirst'));
                 return;
             }
 
             const tasks = AIParser.parseTasks(text);
             if (tasks.length > 0) {
                 todoStore.addTodos(tasks);
-                showToast(`Imported ${tasks.length} tasks!`);
+                showToast(tDynamic('toastImported', tasks.length));
                 toggleImportModal(false);
             } else {
-                showToast("No tasks found in the text.");
+                showToast(t('toastNoTasks'));
             }
+        });
+    }
+
+    // Language Toggle
+    if (langToggleBtn) {
+        langToggleBtn.addEventListener("click", () => {
+            const current = getLanguage();
+            const next = current === 'en' ? 'ko' : 'en';
+            setLanguage(next);
+            render(); // Re-render to update texts
         });
     }
 };

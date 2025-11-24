@@ -13,7 +13,10 @@ const elements = {
   openImportBtn: document.getElementById("open-import-btn")!,
   closeModalBtn: document.getElementById("close-modal-btn")!,
   processImportBtn: document.getElementById("process-import-btn")!,
+  pasteImportBtn: document.getElementById("paste-import-btn")!,
   importTextarea: document.getElementById("import-textarea") as HTMLTextAreaElement,
+  langToggleBtn: document.getElementById("lang-toggle-btn")!,
+  langText: document.querySelector(".lang-text") as HTMLSpanElement,
 };
 
 export const getElements = () => elements;
@@ -26,6 +29,31 @@ export const toggleImportModal = (show: boolean) => {
     elements.importModal.classList.add("hidden");
     elements.importTextarea.value = ""; // Clear on close
   }
+};
+
+import { t, getLanguage } from "../services/i18n";
+
+export const updateTranslations = () => {
+  // Update text content
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n') as any;
+    if (key) {
+      el.innerHTML = t(key);
+    }
+  });
+
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder') as any;
+    if (key) {
+      (el as HTMLInputElement).placeholder = t(key);
+    }
+  });
+
+  // Update language toggle text
+  const currentLang = getLanguage();
+  elements.langText.textContent = currentLang === 'en' ? 'KO' : 'EN';
+  elements.langToggleBtn.setAttribute('aria-label', t('langToggleLabel'));
 };
 
 /**
@@ -66,7 +94,7 @@ const renderTodoList = () => {
   const focusedId = todoStore.getFocusedTodoId();
 
   if (todosToRender.length === 0) {
-    elements.todoList.innerHTML = `<li class="empty-state">No todos found. Try a different filter or create a new one!</li>`;
+    elements.todoList.innerHTML = `<li class="empty-state">${t('emptyState')}</li>`;
     return;
   }
 
@@ -95,6 +123,7 @@ const renderFilters = () => {
  * Renders the entire application UI based on the current state.
  */
 export const render = () => {
+  updateTranslations();
   renderTodoList();
   renderFilters();
   elements.searchInput.value = todoStore.getSearchTerm();
@@ -103,13 +132,24 @@ export const render = () => {
 
 /**
  * Shows a toast notification message.
- * @param message The message to display.
+ * @param message The message to display (can be a translation key or raw string).
  */
 export const showToast = (message: string) => {
+  // Check if message is a key in translations
+  // This is a simple check; for more robust apps, use a specific type or prefix
+  let displayMessage = message;
+  try {
+    // Try to translate if it looks like a key (simple heuristic or just try)
+    // In this app, we'll assume if it matches a key in 'en', it's a key.
+    // But since we pass dynamic strings too, we might need to be careful.
+    // For now, let's just display what is passed, assuming the caller translates it.
+    displayMessage = message;
+  } catch (e) { }
+
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerHTML = `
-        <span class="toast-message">${message}</span>
+        <span class="toast-message">${displayMessage}</span>
         <button class="toast-close">&times;</button>
     `;
   elements.toastContainer.appendChild(toast);
