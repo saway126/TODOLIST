@@ -1,17 +1,21 @@
 import { todoStore } from "../services/todoStore";
+import { listStore } from "../services/listStore";
 import { FilterType } from "../types";
 import { showToast, clearAddTodoInput, getElements, toggleImportModal, render, updateTranslations } from "./dom";
 import { THEME_STORAGE_KEY } from "../main";
 import { AIParser } from "../services/aiParser";
 import { t, getLanguage, setLanguage, tDynamic } from "../services/i18n";
-import { analyzeImage, analyzePdf, getApiKey, setApiKey } from "../services/aiService";
+import { analyzeImage, analyzePdf, getApiKey, setApiKey, getWisdom, breakdownTask } from "../services/aiService";
 
 const addTodoForm = document.getElementById("add-todo-form") as HTMLFormElement;
 const addTodoInput = document.getElementById("add-todo-input") as HTMLInputElement;
 const todoList = document.getElementById("todo-list") as HTMLUListElement;
-const filterControls = document.getElementById("filter-controls") as HTMLDivElement;
 const searchInput = document.getElementById("search-input") as HTMLInputElement;
 const themeToggle = document.getElementById('theme-toggle') as HTMLInputElement;
+const filterControls = document.getElementById("filter-controls") as HTMLDivElement;
+const cosmicBanner = document.getElementById('cosmic-banner') as HTMLDivElement;
+const cosmicMessage = document.getElementById('cosmic-message') as HTMLParagraphElement;
+const closeBannerBtn = document.getElementById('close-banner-btn') as HTMLButtonElement;
 
 const handleAddTodo = (e: SubmitEvent) => {
     e.preventDefault();
@@ -29,7 +33,9 @@ const handleTodoListClick = (e: MouseEvent) => {
     if (!li) return;
     const id = li.dataset.id!;
 
-    if (target.classList.contains("todo-checkbox")) {
+    if (target.closest(".ai-breakdown-btn")) {
+        handleBreakdownTask(id);
+    } else if (target.classList.contains("todo-checkbox")) {
         todoStore.toggleTodoCompletion(id);
     } else if (target.closest(".delete-btn")) {
         todoStore.deleteTodo(id);
@@ -72,6 +78,8 @@ const handleThemeToggle = () => {
 const enterEditMode = (li: HTMLLIElement, id: string) => {
     const textSpan = li.querySelector(".todo-text") as HTMLSpanElement;
     const editInput = li.querySelector(".edit-input") as HTMLInputElement;
+    if (!textSpan || !editInput) return;
+
     textSpan.style.display = "none";
     editInput.style.display = "block";
     editInput.focus();
@@ -150,13 +158,58 @@ const handleGlobalKeyDown = (e: KeyboardEvent) => {
     }
 };
 
+const handleCosmicWisdom = async () => {
+    const pendingTasks = todoStore.getFilteredTodos().filter(t => !t.completed).map(t => t.text);
+    if (pendingTasks.length === 0) {
+        showToast("No pending tasks! Enjoy the silence of the cosmos. 🌌");
+        return;
+    }
+
+    showToast("Receiving cosmic signals... 🐢");
+    try {
+        const wisdom = await getWisdom(pendingTasks);
+        if (cosmicBanner && cosmicMessage) {
+            cosmicMessage.textContent = wisdom;
+            cosmicBanner.classList.remove('hidden');
+        } else {
+            showToast(wisdom);
+        }
+    } catch (error) {
+        showToast("The stars are silent right now.");
+    }
+};
+
+const handleBreakdownTask = async (id: string) => {
+    const todo = todoStore.getTodoById(id);
+    if (!todo) return;
+
+    showToast("Breaking down task... ✨");
+    try {
+        const subtasks = await breakdownTask(todo.text);
+        if (subtasks.length > 0) {
+            const newTodos = subtasks.map(text => ({
+                text: `↳ ${text}`,
+                description: `Subtask of: ${todo.text}`
+            }));
+
+            todoStore.addTodos(newTodos, 'text');
+            showToast(`Created ${subtasks.length} subtasks!`);
+        }
+    } catch (error) {
+        showToast("Failed to break down task.");
+    }
+};
+
 export const initEventListeners = () => {
-    addTodoForm.addEventListener("submit", handleAddTodo);
-    todoList.addEventListener("click", handleTodoListClick);
-    todoList.addEventListener("dblclick", handleTodoListDoubleClick);
-    filterControls.addEventListener('click', handleFilterClick);
-    searchInput.addEventListener('input', handleSearchInput);
-    themeToggle.addEventListener('change', handleThemeToggle);
+    // Basic form and list events
+    if (addTodoForm) addTodoForm.addEventListener("submit", handleAddTodo);
+    if (todoList) {
+        todoList.addEventListener("click", handleTodoListClick);
+        todoList.addEventListener("dblclick", handleTodoListDoubleClick);
+    }
+    if (filterControls) filterControls.addEventListener('click', handleFilterClick);
+    if (searchInput) searchInput.addEventListener('input', handleSearchInput);
+    if (themeToggle) themeToggle.addEventListener('change', handleThemeToggle);
     window.addEventListener("keydown", handleGlobalKeyDown);
 
     // Import Feature Events
@@ -195,6 +248,56 @@ export const initEventListeners = () => {
     }
 
     // File Upload Handling
+    const handleFileUpload = async (file: File) => {
+        if (!getApiKey()) {
+            showToast("Please set API Key in Settings first.");
+            return;
+        }
+
+        showToast("Analyzing file... please wait.");
+
+        try {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = async (e: ProgressEvent<FileReader>) => {
+                    const base64Full = e.target?.result as string;
+                    if (!base64Full) return;
+                    const base64Data = base64Full.split(',')[1];
+                    try {
+                        const result = await analyzeImage(base64Data);
+                        processAnalysisResult(result, 'image', base64Full);
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Failed to analyze image.");
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                const result = await analyzePdf("dummy pdf content");
+                processAnalysisResult(result, 'pdf', file.name);
+            } else {
+                showToast("Unsupported file type.");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Error processing file.");
+        }
+    };
+
+    const processAnalysisResult = (result: any, sourceType: 'image' | 'pdf', sourceData?: string) => {
+        if (result && result.tasks && result.tasks.length > 0) {
+            const tasksWithSource = result.tasks.map((task: any) => ({
+                ...task,
+                sourceData: sourceData
+            }));
+            todoStore.addTodos(tasksWithSource, sourceType);
+            showToast(tDynamic('toastImported', result.tasks.length));
+            toggleImportModal(false);
+        } else {
+            showToast(t('toastNoTasks'));
+        }
+    };
+
     if (browseBtn && fileInput) {
         browseBtn.addEventListener("click", () => fileInput.click());
     }
@@ -220,62 +323,7 @@ export const initEventListeners = () => {
         });
     }
 
-    const handleFileUpload = async (file: File) => {
-        if (!getApiKey()) {
-            showToast("Please set API Key in Settings first.");
-            return;
-        }
-
-        showToast("Analyzing file... please wait.");
-
-        try {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = async (e: ProgressEvent<FileReader>) => {
-                    const base64Full = e.target?.result as string;
-                    if (!base64Full) return;
-                    // Keep full data URL for preview
-                    const base64Data = base64Full.split(',')[1];
-                    try {
-                        const result = await analyzeImage(base64Data);
-                        // Pass the full base64 data URL for preview
-                        processAnalysisResult(result, 'image', base64Full);
-                    } catch (err) {
-                        console.error(err);
-                        showToast("Failed to analyze image.");
-                    }
-                };
-                reader.readAsDataURL(file);
-            } else if (file.type === 'application/pdf') {
-                // For PDF, we might need to extract text or send as file
-                // For this mock, we'll just send a dummy text
-                const result = await analyzePdf("dummy pdf content");
-                processAnalysisResult(result, 'pdf', file.name);
-            } else {
-                showToast("Unsupported file type.");
-            }
-        } catch (err) {
-            console.error(err);
-            showToast("Error processing file.");
-        }
-    };
-
-    const processAnalysisResult = (result: any, sourceType: 'image' | 'pdf', sourceData?: string) => {
-        if (result && result.tasks && result.tasks.length > 0) {
-            // Add sourceData to each task
-            const tasksWithSource = result.tasks.map((task: any) => ({
-                ...task,
-                sourceData: sourceData
-            }));
-            todoStore.addTodos(tasksWithSource, sourceType);
-            showToast(tDynamic('toastImported', result.tasks.length));
-            toggleImportModal(false);
-        } else {
-            showToast(t('toastNoTasks'));
-        }
-    };
-
-    // Detail Modal - Enhanced
+    // Detail Modal
     if (todoList) {
         todoList.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
@@ -287,38 +335,31 @@ export const initEventListeners = () => {
                     const todo = todoStore.getTodoById(id);
 
                     if (todo && detailModal) {
-                        // Set title
                         detailTitle.textContent = todo.text;
 
-                        // Set description
                         const descEl = document.getElementById('detail-description');
                         if (descEl) {
                             descEl.textContent = todo.description || 'No description available.';
                         }
 
-                        // Set source badge
                         const sourceText = todo.sourceType ?
                             (todo.sourceType === 'image' ? '🖼️ Image' :
                                 todo.sourceType === 'pdf' ? '📄 PDF' : '📝 Text') : '📝 Text';
                         detailSourceBadge.textContent = sourceText;
                         detailSourceBadge.className = `badge source-${todo.sourceType || 'text'}`;
 
-                        // Set date
                         detailDate.textContent = new Date(todo.createdAt).toLocaleString();
 
-                        // Handle preview section
                         const previewSection = document.getElementById('detail-preview-section');
                         const previewContainer = document.getElementById('detail-preview-container');
 
                         if (todo.sourceData && previewSection && previewContainer) {
                             if (todo.sourceType === 'image') {
-                                // Show image preview
                                 previewContainer.innerHTML = `
                                     <img src="${todo.sourceData}" alt="Source image" class="preview-image" />
                                 `;
                                 previewSection.classList.remove('hidden');
                             } else if (todo.sourceType === 'pdf') {
-                                // Show PDF info
                                 previewContainer.innerHTML = `
                                     <div class="pdf-preview">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="pdf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -371,7 +412,6 @@ export const initEventListeners = () => {
         previewFullscreenBtn.addEventListener('click', () => {
             const previewImg = document.querySelector('.preview-image') as HTMLImageElement;
             if (previewImg && previewImg.src) {
-                // Open in new window
                 window.open(previewImg.src, '_blank');
             }
         });
@@ -407,7 +447,6 @@ export const initEventListeners = () => {
     }
 
     if (importModal) {
-        // Close on click outside
         importModal.addEventListener("click", (e) => {
             if (e.target === importModal) toggleImportModal(false);
         });
@@ -423,7 +462,6 @@ export const initEventListeners = () => {
 
             const tasks = AIParser.parseTasks(text);
             if (tasks.length > 0) {
-                // Map strings to objects for the new signature
                 todoStore.addTodos(tasks.map(t => ({ text: t })), 'text');
                 showToast(tDynamic('toastImported', tasks.length));
                 toggleImportModal(false);
@@ -439,7 +477,29 @@ export const initEventListeners = () => {
             const current = getLanguage();
             const next = current === 'en' ? 'ko' : 'en';
             setLanguage(next);
-            render(); // Re-render to update texts
+            render();
+        });
+    }
+
+    // Feature Preview Button
+    const featurePreviewBtn = document.getElementById('feature-preview-btn');
+    if (featurePreviewBtn) {
+        featurePreviewBtn.addEventListener('click', () => {
+            todoStore.addDemoData();
+            showToast("✨ Demo data loaded! Check out the tasks.");
+        });
+    }
+
+    // Cosmic Wisdom Button
+    const cosmicWisdomBtn = document.getElementById('cosmic-wisdom-btn');
+    if (cosmicWisdomBtn) {
+        cosmicWisdomBtn.addEventListener('click', handleCosmicWisdom);
+    }
+
+    // Close Banner Button
+    if (closeBannerBtn) {
+        closeBannerBtn.addEventListener('click', () => {
+            cosmicBanner.classList.add('hidden');
         });
     }
 };

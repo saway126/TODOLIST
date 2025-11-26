@@ -1,68 +1,51 @@
+import { Todo } from "../types";
+
 export class AIParser {
     /**
-     * Parses a raw string and extracts potential todo items.
+     * Parses text to find potential tasks.
      * Supports:
-     * - Markdown checklists: - [ ] Task
-     * - Bullet points: * Task, - Task
-     * - Numbered lists: 1. Task
-     * - "Todo:" prefix
+     * - Standard bullet points (- [ ] task)
+     * - Numbered lists (1. task)
+     * - Chat logs (User: ... Assistant: ...) -> Extracts actionable items from Assistant's response or User's request
      */
     static parseTasks(text: string): string[] {
-        const lines = text.split('\n');
         const tasks: string[] = [];
+        const lines = text.split('\n');
+
+        // Regex for chat logs
+        // Matches "User:", "Human:", "Assistant:", "AI:", "Claude:", "GPT:"
+        const chatRoleRegex = /^(User|Human|Assistant|AI|Claude|GPT|Model)\s?:/i;
+
+        // Regex for standard tasks
+        const todoRegex = /^(\s*[-*]\s+\[\s*\]\s+|[-*]\s+|\d+\.\s+)(.+)/;
+
+        let isInCodeBlock = false;
 
         for (const line of lines) {
             const trimmed = line.trim();
-            if (!trimmed) continue;
 
-            // 1. Markdown Checklists: - [ ] Task, - [x] Task
-            const checkboxMatch = trimmed.match(/^-\s*\[[ xX]?\]\s+(.+)$/);
-            if (checkboxMatch) {
-                tasks.push(checkboxMatch[1].trim());
+            if (trimmed.startsWith('```')) {
+                isInCodeBlock = !isInCodeBlock;
                 continue;
             }
 
-            // 2. Explicit "Todo:" prefix (English & Korean)
-            // Supports: Todo:, To-do:, 할일:, 목표:, 구현:, 수정:
-            const prefixMatch = trimmed.match(/^(?:todo|to-do|할일|목표|구현|수정|task):\s*(.+)$/i);
-            if (prefixMatch) {
-                tasks.push(prefixMatch[1].trim());
+            if (isInCodeBlock) continue;
+
+            // Skip chat role headers themselves, but we might want to process the content
+            if (chatRoleRegex.test(trimmed)) {
                 continue;
             }
 
-            // 3. Markdown Headers as Tasks (e.g., ### Component Name)
-            // Often used in plans to denote sections of work
-            const headerMatch = trimmed.match(/^#{1,6}\s+(.+)$/);
-            if (headerMatch) {
-                tasks.push(headerMatch[1].trim());
-                continue;
+            // Check for standard todo list items
+            const match = trimmed.match(todoRegex);
+            if (match) {
+                tasks.push(match[2].trim());
             }
-
-            // 4. Bolded Items in Lists (e.g., - **API entrypoint** description)
-            // Extracts the bolded part as the main task
-            const boldItemMatch = trimmed.match(/^[-*]\s+\*\*(.+?)\*\*(.*)$/);
-            if (boldItemMatch) {
-                const title = boldItemMatch[1].trim();
-                // const desc = boldItemMatch[2].trim(); // Option: include description?
-                // For now, let's just use the title as it's usually the actionable item
-                tasks.push(title);
-                continue;
-            }
-
-            // 5. Bullet points with "strong" action verbs or context (heuristic)
-            // Matches: - Task, * Task
-            const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
-            if (bulletMatch) {
-                tasks.push(bulletMatch[1].trim());
-                continue;
-            }
-
-            // 6. Numbered lists
-            // Matches: 1. Task
-            const numberMatch = trimmed.match(/^\d+\.\s+(.+)$/);
-            if (numberMatch) {
-                tasks.push(numberMatch[1].trim());
-                continue;
+            // Heuristic: If it looks like an imperative sentence in a chat context, maybe it's a task?
+            // For now, let's stick to explicit lists to avoid noise.
+            // But we can support "TODO:" prefix
+            else if (trimmed.toUpperCase().startsWith('TODO:')) {
+                tasks.push(trimmed.substring(5).trim());
             }
         }
 

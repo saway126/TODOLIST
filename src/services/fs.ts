@@ -12,12 +12,40 @@ const TODO_FILE = "todos.json";
 let dataDir: string | null = null;
 
 const getAppDataDir = async (): Promise<string> => {
-    if(!dataDir) {
-        dataDir = await appDataDir();
-    }
-    return dataDir;
+  if (!dataDir) {
+    dataDir = await appDataDir();
+  }
+  return dataDir;
 }
 
+/**
+ * Generic function to read any JSON file from app data directory
+ */
+export const readFile = async (filename: string): Promise<string> => {
+  const dir = await getAppDataDir();
+  const filePath = await join(dir, filename);
+
+  if (!(await exists(filePath))) {
+    throw new Error(`File ${filename} does not exist`);
+  }
+
+  return await readTextFile(filePath);
+};
+
+/**
+ * Generic function to write any JSON file to app data directory
+ */
+export const writeFile = async (filename: string, content: string): Promise<void> => {
+  const dir = await getAppDataDir();
+  const filePath = await join(dir, filename);
+
+  // Ensure the directory exists before writing
+  if (!(await exists(dir))) {
+    await createDir(dir, { recursive: true });
+  }
+
+  await writeTextFile(filePath, content);
+};
 
 /**
  * Reads todos from the JSON file in the app's data directory.
@@ -31,9 +59,42 @@ export const readTodos = async (): Promise<Todo[]> => {
     if (!(await exists(filePath))) {
       // If the file doesn't exist, return example data.
       return [
-        { id: '1', text: 'Learn Tauri and TypeScript', completed: true, createdAt: new Date().toISOString() },
-        { id: '2', text: 'Build a beautiful Desktop App', completed: false, createdAt: new Date().toISOString() },
-        { id: '3', text: 'Explore keyboard shortcuts', completed: false, createdAt: new Date().toISOString() },
+        {
+          id: '1',
+          text: 'Learn Tauri and TypeScript',
+          completed: true,
+          createdAt: new Date().toISOString(),
+          listId: 'default',
+          myDay: false,
+          priority: 'none',
+          tags: [],
+          steps: [],
+          attachments: []
+        },
+        {
+          id: '2',
+          text: 'Build a beautiful Desktop App',
+          completed: false,
+          createdAt: new Date().toISOString(),
+          listId: 'default',
+          myDay: true,
+          priority: 'high',
+          tags: ['development'],
+          steps: [],
+          attachments: []
+        },
+        {
+          id: '3',
+          text: 'Explore keyboard shortcuts',
+          completed: false,
+          createdAt: new Date().toISOString(),
+          listId: 'default',
+          myDay: false,
+          priority: 'low',
+          tags: [],
+          steps: [],
+          attachments: []
+        },
       ];
     }
     const content = await readTextFile(filePath);
@@ -51,7 +112,7 @@ export const readTodos = async (): Promise<Todo[]> => {
 export const writeTodos = async (todos: Todo[]): Promise<void> => {
   const dir = await getAppDataDir();
   const filePath = await join(dir, TODO_FILE);
-  
+
   try {
     // Ensure the directory exists before writing
     if (!(await exists(dir))) {

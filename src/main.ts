@@ -1,7 +1,8 @@
 import "./styles.css";
 import { todoStore } from "./services/todoStore";
+import { listStore } from "./services/listStore";
 import { initEventListeners } from "./ui/events";
-import { render } from "./ui/dom";
+import { render, initVisuals } from "./ui/dom";
 import { appWindow } from '@tauri-apps/api/window';
 
 export const THEME_STORAGE_KEY = 'todo-app-theme';
@@ -15,31 +16,48 @@ const setInitialTheme = async () => {
     document.body.dataset.theme = savedTheme;
     if (themeToggle) themeToggle.checked = savedTheme === 'dark';
   } else {
-    const systemTheme = await appWindow.theme();
-    const theme = systemTheme === 'light' ? 'light' : 'dark';
-    document.body.dataset.theme = theme;
-    if (themeToggle) themeToggle.checked = theme === 'dark';
+    // Default to dark for the space theme
+    document.body.dataset.theme = 'dark';
+    if (themeToggle) themeToggle.checked = true;
+
+    try {
+      const systemTheme = await appWindow.theme();
+      // Optional: Handle system theme if needed
+    } catch (e) {
+      console.warn("Failed to get system theme", e);
+    }
   }
 };
 
-// Listen for system theme changes ONLY if no manual override is set
-appWindow.onThemeChanged(({ payload: theme }) => {
-  if (!localStorage.getItem(THEME_STORAGE_KEY)) {
-    const newTheme = theme === 'light' ? 'light' : 'dark';
-    document.body.dataset.theme = newTheme;
-    const themeToggle = document.getElementById('theme-toggle') as HTMLInputElement;
-    if (themeToggle) themeToggle.checked = newTheme === 'dark';
-  }
-});
+// Listen for system theme changes
+try {
+  appWindow.onThemeChanged(({ payload: theme }) => {
+    if (!localStorage.getItem(THEME_STORAGE_KEY)) {
+      // Optional: Handle system theme changes
+    }
+  });
+} catch (e) {
+  console.warn("Failed to listen for theme changes", e);
+}
 
 // Main application entry point
 const main = async () => {
   await setInitialTheme();
-  
-  todoStore.onChange(render);
 
+  // Initialize visuals (Stars & Turtle)
+  initVisuals();
+
+  // Subscribe to store changes
+  todoStore.onChange(render);
+  listStore.subscribe(render);
+
+  // Initialize stores
+  await listStore.init();
   await todoStore.init();
-  
+
+  // Initial render
+  render();
+
   initEventListeners();
 };
 
