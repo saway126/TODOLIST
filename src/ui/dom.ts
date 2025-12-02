@@ -149,7 +149,7 @@ const createTodoItemHTML = (todo: Todo, isFocused: boolean): string => {
   ` : '';
 
   return `
-    <li data-id="${todo.id}" class="${focusedClass}">
+    <li data-id="${todo.id}" class="todo-item ${focusedClass}">
       <input type="checkbox" class="todo-checkbox" ${todo.completed ? "checked" : ""}>
       <div class="todo-text-container">
         <span class="todo-text ${completedClass}">${todo.text}</span>
